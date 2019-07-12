@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace my_own_json_api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class ValuesController : ControllerBase
     {

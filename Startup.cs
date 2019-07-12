@@ -6,10 +6,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using my_own_json_api.Models.Context;
+using my_own_json_api.Services;
 
 namespace my_own_json_api
 {
@@ -25,7 +28,7 @@ namespace my_own_json_api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddDbContext<IWABS_Context>(options => options.UseSqlServer(Configuration["ConnectionStrings:IWABS_Connection"]));
+            services.AddDbContext<JSONContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:JSONConnection"]));
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
@@ -35,6 +38,8 @@ namespace my_own_json_api
                       .AllowCredentials()
                 .Build());
             });
+
+            services.AddScoped<TodosService>();
 
             services.AddMvc();
         }
