@@ -22,16 +22,19 @@ namespace my_own_json_api.Models.Context
                     new Todo {
                         Id = Guid.NewGuid().ToString(),
                         Title = "lorem ipsum dolor sit amet",
+                        Date = DateTime.Now.ToString("dd-MM-yyyy, hh:mm:ss"),
                         Completed = false
                     },
                     new Todo {
                         Id = Guid.NewGuid().ToString(),
                         Title = "dolor sit amet consectetur adipisicing",
+                        Date = DateTime.Now.ToString("dd-MM-yyyy, hh:mm:ss"),
                         Completed = true
                     },
                     new Todo {
                         Id = Guid.NewGuid().ToString(),
                         Title = "iusto modi reiciendis voluptates corrupti minima saepe dolorum",
+                        Date = DateTime.Now.ToString("dd-MM-yyyy, hh:mm:ss"),
                         Completed = false
                     }
                 }

@@ -8,6 +8,5 @@ namespace my_own_json_api.Models.UIModels
     public class TodoUI
     {
         public string Title { get; set; }
-        public bool Completed { get; set; }
     }
 }

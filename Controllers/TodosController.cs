@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using my_own_json_api.Models;
+using my_own_json_api.Models.UIModels;
 using my_own_json_api.Services;
 
 namespace my_own_json_api.Controllers
@@ -13,45 +14,61 @@ namespace my_own_json_api.Controllers
     [ApiController]
     public class TodosController : ControllerBase
     {
-        private readonly TodosService todoService;
-        public TodosController(TodosService todoService)
+        private readonly TodosService todosService;
+        public TodosController(TodosService todosService)
         {
-            this.todoService = todoService;
+            this.todosService = todosService;
         }
-        // GET: api/Todo
         [HttpGet]
         public ActionResult<IEnumerable<Todo>> Get()
         {
-            IEnumerable<Todo> todos = todoService.GetTodos();
+            IEnumerable<Todo> todos = todosService.GetTodos();
+            if (todos.Count() == 0) 
+                return NoContent();
+            else
+                return Ok(new { todos });
+        }
+        [HttpGet("search/{searched}")]
+        public ActionResult<IEnumerable<Todo>> Search(string searched)
+        {
+            IEnumerable<Todo> todos = todosService.Search(searched);
             if (todos.Count() == 0)
                 return NoContent();
             else
                 return Ok(new { todos });
         }
-
-        // GET: api/Todo/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST: api/Todo
         [HttpPost]
-        public void Post([FromBody] string value)
+        public ActionResult<Todo> Post(TodoUI todoUI)
         {
+            if (todoUI.Title != null && todoUI.Title != "")
+            {
+                Todo todo = todosService.Init(todoUI.Title);
+                todosService.Save(todo);
+                return Ok(new { todo });
+            }
+            return BadRequest(new { message = "title is null or empty" });
         }
-
-        // PUT: api/Todo/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public ActionResult<Todo> Put(string id, Todo todo)
         {
-        }
+            if (todo != null && todo.Id == id)
+            {
+                todosService.Update(todo);
+                return Ok(new { todo });
+            }
 
-        // DELETE: api/ApiWithActions/5
+            return BadRequest(new { message = "element haven't been found" });
+        }
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public ActionResult<object> Delete(string id)
         {
+            Todo todo = todosService.GetTodo(id);
+            if (todo != null)
+            {
+                todosService.Delete(todo);
+                return Ok(new { message = "success" });
+            }
+            return BadRequest(new { message = "element haven't been found" });
         }
     }
 }

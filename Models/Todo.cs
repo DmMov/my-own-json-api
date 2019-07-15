@@ -9,5 +9,7 @@ namespace my_own_json_api.Models
     public class Todo : TodoUI
     {
         public string Id { get; set; }
+        public bool Completed { get; set; }
+        public string Date { get; set; }
     }
 }
