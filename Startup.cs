@@ -40,6 +40,7 @@ namespace my_own_json_api
             });
 
             services.AddScoped<TodosService>();
+            services.AddScoped<NewsService>();
 
             services.AddMvc();
         }
