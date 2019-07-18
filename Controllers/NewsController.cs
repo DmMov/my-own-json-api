@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using my_own_json_api.Models;
 using my_own_json_api.Models.Context;
+using my_own_json_api.Models.UIModels;
 using my_own_json_api.Services;
 
 namespace my_own_json_api.Controllers
@@ -21,13 +22,20 @@ namespace my_own_json_api.Controllers
             this.newsService = newsService;
         }
         [HttpGet]
-        public ActionResult<IEnumerable<BitOfNews>> GetNews()
+        public ActionResult<IEnumerable<BitOfNews>> GetNews(int limit, string search)
         {
             IEnumerable<BitOfNews> news =  newsService.GetNews();
+
             if (news.Count() == 0)
                 return NoContent();
-            else
-                return Ok(new { news });
+
+            if (search != null && search != "")
+                news = newsService.Search(search, news);
+
+            if (limit > 0)
+                news = news.TakeLast(limit);
+
+            return Ok(new { news });
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBitOfNews(string id)
@@ -56,32 +64,32 @@ namespace my_own_json_api.Controllers
             if (!updateResult)
                 return NotFound();
 
-            return NoContent();
+            return Ok(new { bitOfNews });
         }
         [HttpPost]
-        public async Task<IActionResult> PostBitOfNews(BitOfNews bitOfNews)
+        public IActionResult PostBitOfNews(BitOfNewsUI bitOfNewsUI)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (bitOfNewsUI == null)
+                return BadRequest();
 
-            await newsService.Save(bitOfNews);
+            BitOfNews bitOfNews = newsService.Init(bitOfNewsUI);
+
+            newsService.Save(bitOfNews);
 
             return CreatedAtAction("GetBitOfNews", new { id = bitOfNews.Id }, bitOfNews);
         }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBitOfNews(string id)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (id == null || id == "")
+                return BadRequest(new { message = "id is empty or null" });
 
             BitOfNews bitOfNews = await newsService.GetBitOfNews(id);
+
             if (bitOfNews == null)
                 return NotFound();
 
-            bool deleteResult = await newsService.Delete(bitOfNews);
-
-            if (!deleteResult)
-                return BadRequest();
+            newsService.Delete(bitOfNews);
 
             return Ok(bitOfNews);
         }

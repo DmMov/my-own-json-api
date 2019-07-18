@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using my_own_json_api.Models;
 using my_own_json_api.Models.Context;
+using my_own_json_api.Models.UIModels;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,19 +17,14 @@ namespace my_own_json_api.Services
         {
             this.context = context;
         }
-        public IEnumerable<BitOfNews> GetNews() => context.News;
-
+        public IEnumerable<BitOfNews> GetNews() => context.News.OrderBy(bit => bit.Date);
+        public IEnumerable<BitOfNews> Search(string search, IEnumerable<BitOfNews> news) => news.Where(todo => todo.Title.ToLower().Contains(search));
         public async Task<BitOfNews> GetBitOfNews(string id) => await context.News.FindAsync(id);
-        public bool BitOfNewsExists(string id)
-        {
-            return context.News.Any(e => e.Id == id);
-        }
-        public async Task<bool> Save(BitOfNews bitOfNews)
+        public bool BitOfNewsExists(string id) => context.News.Any(e => e.Id == id);
+        public async void Save(BitOfNews bitOfNews)
         {
             context.News.Add(bitOfNews);
             await context.SaveChangesAsync();
-
-            return context.News.Any(bit => bit.Id == bitOfNews.Id);
         }
 
         public async Task<bool> Update(string id, BitOfNews bitOfNews)
@@ -48,13 +44,18 @@ namespace my_own_json_api.Services
             }
             return true;
         }
-
-        public async Task<bool> Delete(BitOfNews bitOfNews)
+        public BitOfNews Init(BitOfNewsUI bitOfNewsUI) => new BitOfNews
+        {
+            Id = Guid.NewGuid().ToString(),
+            Date = DateTime.Now.ToString("dd-MM-yyyy, hh:mm:ss"),
+            Title = bitOfNewsUI.Title,
+            Body = bitOfNewsUI.Body,
+            ImageUrl = bitOfNewsUI.ImageUrl
+        };
+        public async void Delete(BitOfNews bitOfNews)
         {
             context.News.Remove(bitOfNews);
             await context.SaveChangesAsync();
-
-            return !context.News.Any(bit => bit.Id == bitOfNews.Id);
         }
     }
 }

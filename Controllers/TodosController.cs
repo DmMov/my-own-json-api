@@ -20,22 +20,20 @@ namespace my_own_json_api.Controllers
             this.todosService = todosService;
         }
         [HttpGet]
-        public ActionResult<IEnumerable<Todo>> Get()
+        public ActionResult<IEnumerable<Todo>> Get(int limit, string search)
         {
             IEnumerable<Todo> todos = todosService.GetTodos();
+
             if (todos.Count() == 0) 
                 return NoContent();
-            else
-                return Ok(new { todos });
-        }
-        [HttpGet("search/{searched}")]
-        public ActionResult<IEnumerable<Todo>> Search(string searched)
-        {
-            IEnumerable<Todo> todos = todosService.Search(searched);
-            if (todos.Count() == 0)
-                return NoContent();
-            else
-                return Ok(new { todos });
+
+            if (search != null && search != "")
+                todos = todosService.Search(search, todos);
+
+            if (limit > 0)
+                todos = todos.TakeLast(limit);
+
+            return Ok(new { todos });
         }
         [HttpPost]
         public ActionResult<Todo> Post(TodoUI todoUI)
@@ -49,26 +47,35 @@ namespace my_own_json_api.Controllers
             return BadRequest(new { message = "title is null or empty" });
         }
         [HttpPut("{id}")]
-        public ActionResult<Todo> Put(string id, Todo todo)
+        public async Task<ActionResult<Todo>> PutAsync(string id, Todo todo)
         {
-            if (todo != null && todo.Id == id)
-            {
-                todosService.Update(todo);
-                return Ok(new { todo });
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            return BadRequest(new { message = "element haven't been found" });
+            if (id != todo.Id)
+                return BadRequest();
+
+            bool updateResult = await todosService.Update(id, todo);
+
+            if (!updateResult)
+                return NotFound();
+
+            return Ok(new { todo });
         }
         [HttpDelete("{id}")]
-        public ActionResult<object> Delete(string id)
+        public async Task<ActionResult<Todo>> Delete(string id)
         {
-            Todo todo = todosService.GetTodo(id);
-            if (todo != null)
-            {
-                todosService.Delete(todo);
-                return Ok(new { message = "success" });
-            }
-            return BadRequest(new { message = "element haven't been found" });
+            if (id == null || id == "")
+                return BadRequest(new { message = "id is empty or null" });
+
+            Todo todo = await todosService.GetTodoAsync(id);
+
+            if (todo == null)
+                return NotFound();
+
+            todosService.Delete(todo);
+
+            return Ok(new { message = "success" });
         }
     }
 }
