@@ -29,11 +29,11 @@ namespace my_own_json_api.Controllers
             if (news.Count() == 0)
                 return NoContent();
 
-            if (search != null && search != "")
+            if (search != null && search != "" && search != "undefined")
                 news = newsService.Search(search, news);
 
             if (limit > 0)
-                news = news.TakeLast(limit);
+                news = news.Take(limit);
 
             return Ok(new { news });
         }

@@ -44,10 +44,10 @@ namespace my_own_json_api.Services
 
             return true;
         }
-        public async void Delete(Todo todo)
+        public void Delete(Todo todo)
         {
             context.Todos.Remove(todo);
-            await context.SaveChangesAsync();
+            context.SaveChangesAsync();
         }
         public Todo Init(string title) => new Todo
         {

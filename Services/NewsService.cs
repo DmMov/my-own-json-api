@@ -17,14 +17,14 @@ namespace my_own_json_api.Services
         {
             this.context = context;
         }
-        public IEnumerable<BitOfNews> GetNews() => context.News.OrderBy(bit => bit.Date);
+        public IEnumerable<BitOfNews> GetNews() => context.News.OrderByDescending(bit => bit.Date);
         public IEnumerable<BitOfNews> Search(string search, IEnumerable<BitOfNews> news) => news.Where(todo => todo.Title.ToLower().Contains(search));
         public async Task<BitOfNews> GetBitOfNews(string id) => await context.News.FindAsync(id);
         public bool BitOfNewsExists(string id) => context.News.Any(e => e.Id == id);
-        public async void Save(BitOfNews bitOfNews)
+        public void Save(BitOfNews bitOfNews)
         {
             context.News.Add(bitOfNews);
-            await context.SaveChangesAsync();
+            context.SaveChanges();
         }
 
         public async Task<bool> Update(string id, BitOfNews bitOfNews)
@@ -52,10 +52,10 @@ namespace my_own_json_api.Services
             Body = bitOfNewsUI.Body,
             ImageUrl = bitOfNewsUI.ImageUrl
         };
-        public async void Delete(BitOfNews bitOfNews)
+        public void Delete(BitOfNews bitOfNews)
         {
             context.News.Remove(bitOfNews);
-            await context.SaveChangesAsync();
+            context.SaveChangesAsync();
         }
     }
 }
